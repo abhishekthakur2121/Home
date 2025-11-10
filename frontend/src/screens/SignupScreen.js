@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import CountryPicker from 'react-native-country-picker-modal';
 import InputField from '../components/InputField';
 import ButtonPrimary from '../components/ButtonPrimary';
 import colors from '../utils/colors';
@@ -17,12 +16,9 @@ import { Ionicons } from '@expo/vector-icons';
 export default function SignupScreen({ navigation }) {
   const dispatch = useDispatch();
 
-
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('IN');
-  const [callingCode, setCallingCode] = useState('91');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
@@ -43,7 +39,7 @@ export default function SignupScreen({ navigation }) {
       newErrors.phone = 'Enter a valid 10-digit phone number';
     if (!password) newErrors.password = 'Password is required';
     else if (password.length < 6)
-      newErrors.password = 'Password must be at least 6 characters long';
+      newErrors.password = 'Password must be at least 6 characters';
     if (!confirmPassword) newErrors.confirmPassword = 'Confirm your password';
     else if (password !== confirmPassword)
       newErrors.confirmPassword = 'Passwords do not match';
@@ -52,12 +48,10 @@ export default function SignupScreen({ navigation }) {
     return Object.keys(newErrors).length === 0;
   };
 
-
   const handleSignup = () => {
     if (validateForm()) {
-      const fullPhone = `+${callingCode}${phone}`;
-      dispatch(signupUser({ username, email, phone: fullPhone, password }));
-      navigation.navigate('OTP', { phone: fullPhone });
+      dispatch(signupUser({ username, email, phone, password }));
+      navigation.navigate('OTP', { phone });
     }
   };
 
@@ -65,7 +59,7 @@ export default function SignupScreen({ navigation }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Create Account</Text>
 
- 
+      {/* Username */}
       <InputField
         placeholder="Username"
         value={username}
@@ -74,7 +68,7 @@ export default function SignupScreen({ navigation }) {
       />
       {errors.username && <Text style={styles.error}>{errors.username}</Text>}
 
-     
+      {/* Email */}
       <InputField
         placeholder="Email"
         value={email}
@@ -84,36 +78,17 @@ export default function SignupScreen({ navigation }) {
       />
       {errors.email && <Text style={styles.error}>{errors.email}</Text>}
 
-   
-      <View style={styles.phoneContainer}>
-        <TouchableOpacity style={styles.countryPicker}>
-          <CountryPicker
-            countryCode={countryCode}
-            withCallingCodeButton
-            withFlag
-            withFilter
-            withCallingCode
-            withEmoji
-            onSelect={(country) => {
-              setCountryCode(country.cca2);
-              setCallingCode(country.callingCode[0]);
-            }}
-          />
-        </TouchableOpacity>
-
-        <View style={{ flex: 1 }}>
-          <InputField
-            placeholder="Phone Number"
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-            style={[errors.phone && styles.inputError, { marginLeft: 6 }]}
-          />
-        </View>
-      </View>
+      {/* Phone */}
+      <InputField
+        placeholder="Phone Number"
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+        style={errors.phone && styles.inputError}
+      />
       {errors.phone && <Text style={styles.error}>{errors.phone}</Text>}
 
-
+      {/* Password */}
       <View style={styles.passwordContainer}>
         <InputField
           placeholder="Password"
@@ -135,7 +110,7 @@ export default function SignupScreen({ navigation }) {
       </View>
       {errors.password && <Text style={styles.error}>{errors.password}</Text>}
 
-  
+      {/* Confirm Password */}
       <View style={styles.passwordContainer}>
         <InputField
           placeholder="Confirm Password"
@@ -159,7 +134,7 @@ export default function SignupScreen({ navigation }) {
         <Text style={styles.error}>{errors.confirmPassword}</Text>
       )}
 
-   
+      {/* Continue */}
       <ButtonPrimary title="Continue" onPress={handleSignup} />
 
       <Text style={styles.footerText}>
@@ -172,6 +147,7 @@ export default function SignupScreen({ navigation }) {
   );
 }
 
+// ---------------- STYLES ----------------
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -194,19 +170,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 4,
     marginLeft: 4,
-  },
-  phoneContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  countryPicker: {
-    borderWidth: 0.5 ,
-    borderColor: colors.textLight,
-    borderRadius: 10,
-    paddingVertical: 8.5,
-    justifyContent: 'center',
-    // backgroundColor: colors.white,
-    marginRight: 2,
   },
   passwordContainer: {
     flexDirection: 'row',

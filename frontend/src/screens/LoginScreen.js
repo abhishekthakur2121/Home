@@ -8,20 +8,17 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import CountryPicker from 'react-native-country-picker-modal';
+
 import InputField from '../components/InputField';
 import ButtonPrimary from '../components/ButtonPrimary';
 import colors from '../utils/colors';
 import { useSelector, useDispatch } from 'react-redux';
 import { setLoginMethod } from '../features/userSlice';
-import axios from 'axios';
 
 export default function LoginScreen({ navigation }) {
   const dispatch = useDispatch();
   const loginMethod = useSelector((state) => state.auth.loginMethod);
 
-  const [countryCode, setCountryCode] = useState('IN');
-  const [callingCode, setCallingCode] = useState('91');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
@@ -36,37 +33,28 @@ export default function LoginScreen({ navigation }) {
 
     try {
       setLoading(true);
-      Alert.alert('OTP Sent', 'A 6-digit code has been sent to your number.');
+      Alert.alert('OTP Sent', 'A 6-digit code has been sent.');
       setOtpSent(true);
     } catch (error) {
-      console.error('Send OTP Error:', error);
-      Alert.alert('Error', 'Failed to send OTP. Please try again later.');
+      Alert.alert('Error', 'Failed to send OTP');
     } finally {
       setLoading(false);
     }
   };
 
   const handleLogin = async () => {
-    if (!phone) return Alert.alert('Error', 'Please enter your phone number');
+    if (!phone) return Alert.alert('Error', 'Enter your phone number');
 
     if (loginMethod === 'password' && !password)
-      return Alert.alert('Error', 'Please enter your password');
+      return Alert.alert('Error', 'Enter your password');
 
     if (loginMethod === 'otp') {
-      if (!otpSent) return Alert.alert('Error', 'Please request an OTP first');
-      if (!otp) return Alert.alert('Error', 'Please enter the OTP');
+      if (!otpSent) return Alert.alert('Error', 'Request OTP first');
+      if (!otp) return Alert.alert('Error', 'Enter OTP');
     }
 
-    try {
-      setLoading(true);
-      Alert.alert('Login Successful', `Logged in using ${loginMethod}`);
-      navigation.replace('Home');
-    } catch (error) {
-      console.error('Login Error:', error);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    Alert.alert('Login Successful', `Logged in using ${loginMethod}`);
+    navigation.replace('Home');
   };
 
   return (
@@ -79,7 +67,7 @@ export default function LoginScreen({ navigation }) {
         <Text style={styles.subtitle}>Login to continue with HomeBuddy</Text>
       </View>
 
-   
+      {/* Login Toggle */}
       <View style={styles.toggleContainer}>
         <TouchableOpacity
           onPress={() => {
@@ -87,12 +75,7 @@ export default function LoginScreen({ navigation }) {
             setOtpSent(false);
           }}
         >
-          <Text
-            style={[
-              styles.toggle,
-              loginMethod === 'password' && styles.activeToggle,
-            ]}
-          >
+          <Text style={[styles.toggle, loginMethod === 'password' && styles.activeToggle]}>
             Password Login
           </Text>
         </TouchableOpacity>
@@ -103,44 +86,21 @@ export default function LoginScreen({ navigation }) {
             setPassword('');
           }}
         >
-          <Text
-            style={[
-              styles.toggle,
-              loginMethod === 'otp' && styles.activeToggle,
-            ]}
-          >
+          <Text style={[styles.toggle, loginMethod === 'otp' && styles.activeToggle]}>
             OTP Login
           </Text>
         </TouchableOpacity>
       </View>
 
-      
-      <View style={styles.phoneWrapper}>
-        <View style={styles.countryBox}>
-  <CountryPicker
-    countryCode={countryCode}
-    withFlag
-    withCallingCode
-    withFilter
-    onSelect={(country) => {
-      setCountryCode(country.cca2);
-      setCallingCode(country.callingCode[0]);
-    }}
-  />
-  <Text style={styles.callingCode}>+{callingCode}</Text>
-</View>
+      {/* Phone input (simple) */}
+      <InputField
+        placeholder="Phone Number"
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+      />
 
-        <View style={styles.phoneBox}>
-          <InputField
-            placeholder="Phone Number"
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-          />
-        </View>
-      </View>
-
-    
+      {/* Password OR OTP input */}
       {loginMethod === 'password' && (
         <InputField
           placeholder="Password"
@@ -150,7 +110,6 @@ export default function LoginScreen({ navigation }) {
         />
       )}
 
-  
       {loginMethod === 'otp' && (
         <>
           {!otpSent ? (
@@ -173,7 +132,7 @@ export default function LoginScreen({ navigation }) {
         </>
       )}
 
-   
+      {/* Login Button */}
       <ButtonPrimary
         title={loading ? 'Please wait...' : 'Login'}
         onPress={handleLogin}
@@ -225,33 +184,6 @@ const styles = StyleSheet.create({
     color: colors.accent,
     fontWeight: '700',
     textDecorationLine: 'underline',
-  },
-  phoneWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 10,
-  },
-  countryBox: {
-  flex: 0, 
-  borderWidth: 0.5,
-  borderColor: colors.textLight,
-  borderRadius: 10,
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center',
-  height: 46,
-  paddingVertical:2,
-
-},
-
-  callingCode: {
-    marginLeft: 4,
-    fontWeight: '600',
-    color: colors.textLight,
-  },
-  phoneBox: {
-    flex: 2,
   },
   resendOtp: {
     color: colors.primary,
